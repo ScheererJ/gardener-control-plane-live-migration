@@ -1,0 +1,7 @@
+    hosts {
+      45.129.47.140 etcd-main-migrate-0.etcd-main-peer.shoot--ondemand--test01.svc.cluster.local etcd-main-migrate-0.etcd-main-peer.shoot--ondemand--test01.svc
+      172.16.0.30 etcd-main-99.etcd-main-peer.shoot--ondemand--test01.svc.cluster.local etcd-main-99.etcd-main-peer.shoot--ondemand--test01.svc
+      172.16.1.138 etcd-main-99.etcd-main-peer.shoot--ondemand--test01.svc.cluster.local etcd-main-99.etcd-main-peer.shoot--ondemand--test01.svc
+      172.16.0.49 etcd-main-99.etcd-main-peer.shoot--ondemand--test01.svc.cluster.local etcd-main-99.etcd-main-peer.shoot--ondemand--test01.svc
+      fallthrough
+    }

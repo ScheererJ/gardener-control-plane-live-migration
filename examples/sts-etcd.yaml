@@ -1,0 +1,199 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  annotations:
+    checksum/etcd-configmap: 4c7d04b8bca1a157b57670a5a5d78c724ba889aefad40c2f4dfb2e0562f9c619
+    cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
+    gardener.cloud/owned-by: shoot--ondemand--test01/etcd-main
+    gardener.cloud/owner-type: etcd
+  labels:
+    app: etcd-statefulset
+    gardener.cloud/role: controlplane
+    instance: etcd-main
+    name: etcd
+    networking.gardener.cloud/to-dns: allowed
+    networking.gardener.cloud/to-private-networks: allowed
+    networking.gardener.cloud/to-public-networks: allowed
+    networking.gardener.cloud/to-runtime-apiserver: allowed
+    networking.resources.gardener.cloud/to-etcd-main-client-tcp-2379: allowed
+    networking.resources.gardener.cloud/to-etcd-main-client-tcp-2380: allowed
+    networking.resources.gardener.cloud/to-etcd-main-client-tcp-8080: allowed
+    role: main
+  name: etcd-main-migrate
+  namespace: shoot--ondemand--test01
+spec:
+  podManagementPolicy: Parallel
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      instance: etcd-main
+      name: etcd
+  serviceName: etcd-main-peer
+  template:
+    metadata:
+      annotations:
+        checksum/etcd-configmap: 4c7d04b8bca1a157b57670a5a5d78c724ba889aefad40c2f4dfb2e0562f9c619
+        cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
+      creationTimestamp: null
+      labels:
+        app: etcd-statefulset
+        gardener.cloud/role: controlplane
+        instance: etcd-main
+        name: etcd
+        networking.gardener.cloud/to-dns: allowed
+        networking.gardener.cloud/to-private-networks: allowed
+        networking.gardener.cloud/to-public-networks: allowed
+        networking.gardener.cloud/to-runtime-apiserver: allowed
+        networking.resources.gardener.cloud/to-etcd-main-client-tcp-2379: allowed
+        networking.resources.gardener.cloud/to-etcd-main-client-tcp-2380: allowed
+        networking.resources.gardener.cloud/to-etcd-main-client-tcp-8080: allowed
+        role: main
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: topology.kubernetes.io/zone
+                    operator: In
+                    values:
+                      - eu01-m
+      hostAliases:
+        - hostnames:
+            - etcd-main-local
+          ip: 127.0.0.1
+        - hostnames:
+            - "etcd-main-0.etcd-main-peer.shoot--ondemand--test01.svc.cluster.local"
+            - "etcd-main-0.etcd-main-peer.shoot--ondemand--test01.svc"
+          ip: 45.129.45.65
+        - hostnames:
+            - etcd-main-1.etcd-main-peer.shoot--ondemand--test01.svc.cluster.local
+            - etcd-main-1.etcd-main-peer.shoot--ondemand--test01.svc
+          ip: 45.129.44.102
+        - hostnames:
+            - etcd-main-2.etcd-main-peer.shoot--ondemand--test01.svc.cluster.local
+            - etcd-main-2.etcd-main-peer.shoot--ondemand--test01.svc
+          ip: 45.129.41.181
+        - hostnames:
+            - etcd-main-99.etcd-main-peer.shoot--ondemand--test01.svc.cluster.local
+            - etcd-main-99.etcd-main-peer.shoot--ondemand--test01.svc
+          ip: 172.25.244.12
+        - hostnames:
+            - etcd-main-99.etcd-main-peer.shoot--ondemand--test01.svc.cluster.local
+            - etcd-main-99.etcd-main-peer.shoot--ondemand--test01.svc
+          ip: 172.30.105.90
+      containers:
+        - command:
+            - etcd
+            - --config-file
+            - /etc/etcd/etcd.conf.yaml
+          image: reg.infra.ske.eu01.stackit.cloud/gardener/etcd:v3.4.13-bootstrap-10
+          imagePullPolicy: IfNotPresent
+          name: etcd
+          ports:
+            - containerPort: 2380
+              name: server
+              protocol: TCP
+            - containerPort: 2379
+              name: client
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 300m
+              memory: 1G
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+            - name: etcd-config-file
+              mountPath: /etc/etcd
+            - mountPath: /var/etcd/data/
+              name: main-etcd
+            - mountPath: /var/etcd/ssl/client/ca
+              name: client-url-ca-etcd
+            - mountPath: /var/etcd/ssl/client/server
+              name: client-url-etcd-server-tls
+            - mountPath: /var/etcd/ssl/client/client
+              name: client-url-etcd-client-tls
+            - mountPath: /var/etcd/ssl/peer/ca
+              name: peer-url-ca-etcd
+            - mountPath: /var/etcd/ssl/peer/server
+              name: peer-url-etcd-server-tls
+      dnsPolicy: ClusterFirst
+      priorityClassName: gardener-system-500
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      shareProcessNamespace: true
+      terminationGracePeriodSeconds: 30
+      tolerations:
+        - effect: NoExecute
+          key: node.kubernetes.io/not-ready
+          operator: Exists
+          tolerationSeconds: 60
+        - effect: NoExecute
+          key: node.kubernetes.io/unreachable
+          operator: Exists
+          tolerationSeconds: 60
+      topologySpreadConstraints:
+        - labelSelector:
+            matchLabels:
+              app: etcd-statefulset
+              gardener.cloud/role: controlplane
+              instance: etcd-main
+              name: etcd
+              networking.gardener.cloud/to-dns: allowed
+              networking.gardener.cloud/to-private-networks: allowed
+              networking.gardener.cloud/to-public-networks: allowed
+              networking.gardener.cloud/to-runtime-apiserver: allowed
+              networking.resources.gardener.cloud/to-etcd-main-client-tcp-2379: allowed
+              networking.resources.gardener.cloud/to-etcd-main-client-tcp-2380: allowed
+              networking.resources.gardener.cloud/to-etcd-main-client-tcp-8080: allowed
+              role: main
+          maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: DoNotSchedule
+      volumes:
+        - configMap:
+            defaultMode: 420
+            items:
+              - key: etcd.conf.yaml
+                path: etcd.conf.yaml
+            name: etcd-bootstrap-cec86c #-other
+          name: etcd-config-file
+        - name: client-url-ca-etcd
+          secret:
+            defaultMode: 420
+            secretName: ca-etcd-bundle-3147d8b2
+        - name: client-url-etcd-server-tls
+          secret:
+            defaultMode: 420
+            secretName: etcd-server-main-e59f5104
+        - name: client-url-etcd-client-tls
+          secret:
+            defaultMode: 420
+            secretName: etcd-client-3e568662
+        - name: peer-url-ca-etcd
+          secret:
+            defaultMode: 420
+            secretName: ca-etcd-peer-bundle-921813a4
+        - name: peer-url-etcd-server-tls
+          secret:
+            defaultMode: 420
+            secretName: etcd-peer-server-main-9cbdbd40
+  updateStrategy:
+    type: RollingUpdate
+  volumeClaimTemplates:
+    - apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        name: main-etcd
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 25Gi
+        storageClassName: gardener.cloud-fast
+        volumeMode: Filesystem
+      status:
+        phase: Pending
