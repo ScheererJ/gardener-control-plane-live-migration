@@ -1,0 +1,1 @@
+etcdctl --cacert=/var/etcd/ssl/client/ca/bundle.crt --cert=/var/etcd/ssl/client/server/tls.crt --key=/var/etcd/ssl/client/server/tls.key --endpoints=https://etcd-main-0.etcd-main-peer.shoot--ondemand--test01.svc:2379,https://etcd-main-1.etcd-main-peer.shoot--ondemand--test01.svc:2379,https://etcd-main-2.etcd-main-peer.shoot--ondemand--test01.svc:2379 member list

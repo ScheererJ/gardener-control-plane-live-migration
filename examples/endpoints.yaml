@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: test
+  namespace: default
+subsets:
+  - addresses:
+      - hostname: etcd-main-migrate-0 #.test
+        ip: 45.129.47.140
+      - hostname: etcd-main-99
+        ip: 172.16.0.30
+      - hostname: etcd-main-99
+        ip: 172.16.1.138
+      - hostname: etcd-main-99
+        ip: 172.16.0.49
+    ports:
+      - name: peer
+        port: 2380
+        protocol: TCP

@@ -1,0 +1,140 @@
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: etcd
+  namespace: shoot--ondemand--test01
+spec:
+  selector:
+    app: istio-ingressgateway
+    istio: ingressgateway
+  servers:
+    - hosts:
+        - etcd-main-0.etcd-main-peer.shoot--ondemand--test01.svc.cluster.local
+      port:
+        name: tls
+        number: 2380
+        protocol: TLS
+      tls: {}
+    - hosts:
+        - etcd-main-1.etcd-main-peer.shoot--ondemand--test01.svc.cluster.local
+      port:
+        name: tls
+        number: 2380
+        protocol: TLS
+      tls: {}
+    - hosts:
+        - etcd-main-2.etcd-main-peer.shoot--ondemand--test01.svc.cluster.local
+      port:
+        name: tls
+        number: 2380
+        protocol: TLS
+      tls: {}
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: etcd
+  namespace: shoot--ondemand--test01
+spec:
+  exportTo:
+    - "*"
+  gateways:
+    - etcd
+  hosts:
+    - etcd-main-0.etcd-main-peer.shoot--ondemand--test01.svc.cluster.local
+    - etcd-main-1.etcd-main-peer.shoot--ondemand--test01.svc.cluster.local
+    - etcd-main-2.etcd-main-peer.shoot--ondemand--test01.svc.cluster.local
+  tls:
+    - match:
+        - port: 2380
+          sniHosts:
+            - etcd-main-0.etcd-main-peer.shoot--ondemand--test01.svc.cluster.local
+      route:
+        - destination:
+            host: etcd-main-0.etcd-main-peer.shoot--ondemand--test01.svc.cluster.local
+            port:
+              number: 2380
+    - match:
+        - port: 2380
+          sniHosts:
+            - etcd-main-1.etcd-main-peer.shoot--ondemand--test01.svc.cluster.local
+      route:
+        - destination:
+            host: etcd-main-1.etcd-main-peer.shoot--ondemand--test01.svc.cluster.local
+            port:
+              number: 2380
+    - match:
+        - port: 2380
+          sniHosts:
+            - etcd-main-2.etcd-main-peer.shoot--ondemand--test01.svc.cluster.local
+      route:
+        - destination:
+            host: etcd-main-2.etcd-main-peer.shoot--ondemand--test01.svc.cluster.local
+            port:
+              number: 2380
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: etcd-main-0
+  namespace: shoot--ondemand--test01
+spec:
+  exportTo:
+    - "*"
+  host: etcd-main-0.etcd-main-peer.shoot--ondemand--test01.svc.cluster.local
+  trafficPolicy:
+    connectionPool:
+      tcp:
+        maxConnections: 5000
+        tcpKeepalive:
+          interval: 75s
+          time: 7200s
+    loadBalancer:
+      localityLbSetting:
+        enabled: true
+        failoverPriority:
+          - topology.kubernetes.io/zone
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: etcd-main-1
+  namespace: shoot--ondemand--test01
+spec:
+  exportTo:
+    - "*"
+  host: etcd-main-1.etcd-main-peer.shoot--ondemand--test01.svc.cluster.local
+  trafficPolicy:
+    connectionPool:
+      tcp:
+        maxConnections: 5000
+        tcpKeepalive:
+          interval: 75s
+          time: 7200s
+    loadBalancer:
+      localityLbSetting:
+        enabled: true
+        failoverPriority:
+          - topology.kubernetes.io/zone
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: etcd-main-2
+  namespace: shoot--ondemand--test01
+spec:
+  exportTo:
+    - "*"
+  host: etcd-main-2.etcd-main-peer.shoot--ondemand--test01.svc.cluster.local
+  trafficPolicy:
+    connectionPool:
+      tcp:
+        maxConnections: 5000
+        tcpKeepalive:
+          interval: 75s
+          time: 7200s
+    loadBalancer:
+      localityLbSetting:
+        enabled: true
+        failoverPriority:
+          - topology.kubernetes.io/zone
